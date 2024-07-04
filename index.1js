@@ -1,0 +1,55 @@
+const express = require("express");
+const app = express();
+const mysql = require("mysql2");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const port = 5000;
+
+app.get("/", function (req, res) {
+  res.send("Hello World");
+});
+
+app.listen(port, () => {
+  console.log(`App Running At Port ${port}`);
+});
+
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.json());
+
+const db = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "db_website",
+});
+
+db.connect((err) => {
+  if (err) {
+    console.log("Error connecting to database", err);
+    return;
+  }
+  console.log("Connected to database");
+});
+
+app.get("/admin", (req, res) => {
+  const sql = "SELECT * FROM admin";
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
+app.post("/admin", (req, res) => {
+  const { id, username, email, password } = req.body;
+  const sql =
+    "INSERT INTO admin (id, username, email, password) VALUES (?, ?, ?, ?,)";
+  db.query(sql[(id, username, email, password)], (err, results) => {
+    if (err) {
+      return res.body.status(500).json({ error: err.message });
+    }
+    res.status(201).json({ message: "Data Berhasil Disimpan" });
+  });
+});
